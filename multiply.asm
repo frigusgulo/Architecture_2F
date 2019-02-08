@@ -4,26 +4,22 @@
 @R0
 D=M
 @x
-M+D
+M=D
 @R1
-D = M -1
+D=M-1
 @y
-M = D
-@z
-M = 0
+M=D
 
 (LOOP)
-@z
-D = M
 @y
-D = D - M
+D=M
 @END
-D;JGT
+D;JEQ
 
 @x
-M = M + M
-@z
-M = M +1
+M=M+M
+@y
+M=M-1
 @LOOP
 0;JMP
 
