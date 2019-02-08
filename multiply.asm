@@ -1,14 +1,15 @@
 // Program in HACK assembly language that takes the input of
 // Ram[0] and multiplies by Ram[1]
 
-@R0
-D=M
+
 @x
-M=D
+M=0
 @R1
 D=M
 @y
 M=D
+@R3
+M=0
 
 (LOOP)
 @y
@@ -16,8 +17,11 @@ D=M
 @END
 D;JEQ
 
-@x
-M=M+M
+@R1
+D = M
+@R3
+M = M + D
+
 @y
 M=M-1
 @LOOP
