@@ -6,7 +6,7 @@ D=M
 @x
 M=D
 @R1
-D=M-1
+D=M
 @y
 M=D
 
