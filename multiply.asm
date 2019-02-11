@@ -17,9 +17,9 @@ D=M
 @END
 D;JEQ
 
-@R1
+@R0
 D = M
-@R3
+@R2
 M = M + D
 
 @y
