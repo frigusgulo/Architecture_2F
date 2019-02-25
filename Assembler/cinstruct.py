@@ -1,6 +1,5 @@
 """
 Dictionary for an assembler for hack.
-
 """
 
 #!/usr/bin/env python3
@@ -29,47 +28,47 @@ class Assembler(object):
 	newvars = {}
 	assemblycode = []
 
-	def _init_(self,file):
-		for line in open(file, 'r'):
-            if not line.strip():
+def _init_(self,file):
+	for line in open(file, 'r'):
+        if not line.strip():
             self.assemblycode.append(line.replace(" ",""))
 
-    def assemble(self):
-    	for line in self.assemblycode:
-    		if not line.startswith("//")
-    			gen_code_line_addr(line.split("//")[0])
-    			gen_code(line.split("//")[0])
+def assemble(self):
+    for line in self.assemblycode:
+        if not line.startswith("//")
+            gen_code_line_addr(line.split("//")[0])
+            gen_code(line.split("//")[0])
 
 
 
-    def gen_code_line_addr(line):
-    	global code_addr
-    	global prognextadd
+def gen_code_line_addr(line):
+    global code_addr
+    global prognextadd
 
-    	newline = re.split('(\(|\)|=|;|@)', line)
-    	if newline[1] == '('
-    		if newline[2].isdigit():
-    			return
-    		if newline[2] not in code_addr
-    			code_addr[newline[2]] = prognextadd
+    newline = re.split('(\(|\)|=|;|@)', line)
+    if newline[1] == '(':
+        if newline[2].isdigit():
+            return
+        if newline[2] not in code_addr
+            code_addr[newline[2]] = prognextadd
 
-    	prognextadd += 1
+    prognextadd += 1
 
-   	def gen_code(line):
-   
+def gen_code(line):
+
     global memnextadd
-   	global code_addr
+    global code_addr
 
     newline = re.split('(\(|\)|=|;|@)', line)
     if newline[1] == '(':
         return
     if newline[1] == '=':
-        if newline[2] in comp_a :
-        	a = '1'
-        	print('111' + a + comp_a[newline[2]] + dest[newline[0]] + '000')
+        if newline[2] in comp_a:
+            a = '1'
+            print('111' + a + comp_a[newline[2]] + dest[newline[0]] + '000')
         else :
-        	a = '0'
-        	print('111' + a + comp_nota[newline[2]] + dest[newline[0]] + '000')
+            a = '0'
+            print('111' + a + comp_nota[newline[2]] + dest[newline[0]] + '000')
         return
     if newline[1] == ';':
         print('111' + '0' + comp_a[newline[0]] + '000' + jump[newline[2]])
@@ -92,7 +91,7 @@ class Assembler(object):
         memnextadd += 1
         return
     else:
-        return    
+        return
 
 if __name__ == "__main__":
     assembler = Assembler(sys.argv[1])
