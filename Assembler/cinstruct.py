@@ -1,10 +1,20 @@
 """
-Dictionary for an assembler for hack.
+Hack Assembler.
+Written for CS 300 "Computer Architecture"
+Written by Franklyn Dunbar, Wit Sampson,
+and Justin Bancale
+
+HOW TO USE:
+
+from terminal:
+
+python cinstruct.py "Filename.asm" 
 """
 
 #!/usr/bin/env python3
 import sys
 import re
+
 
 dest = {
   "null": "000",
@@ -43,10 +53,14 @@ comp_nota = {
   "D-1": "001110",
   "A-1": "110010",
   "D+A": "000010",
+  "A+D": "000010",
   "D-A": "010011",
   "A-D": "000111",
   "D&A": "000000",
-  "D|A": "010101"
+  "A&D": "000000",
+  "D|A": "010101",
+  "A|D": "010101"
+
 }
 
 comp_a = {
@@ -56,10 +70,13 @@ comp_a = {
   "M+1": "110111",
   "M-1": "110010",
   "D+M": "000010",
+  "M+D": "000010",
   "D-M": "010011",
   "M-D": "000111",
   "D&M": "000000",
-  "D|M": "010101"
+  "M&D": "000000",
+  "D|M": "010101",
+  "M|D": "010101"
 }
 
 def_add = {
@@ -97,60 +114,81 @@ class Assembler(object):
 
   def __init__(self, object):
     for line in open(object, 'r'):
-      if not line.strip():
-        self.assemblycode.append(line.replace(" ", ""))
+      if line.strip():
+      	if not line.startswith("//"):
+          lineboi1 = line.replace(" ", "").replace("\n","")
+          self.assemblycode.append(lineboi1)
+    
   def assemble(self):
-    for line in self.assemblycode:
+    output = open("output.txt", "w") 
+    for line in self.assemblycode: 
       if not line.startswith("//"):
-        gen_code_line_addr(line.split("//")[0])
-        gen_code(line.split("//")[0])
-
-  def gen_code_line_addr(line):
+        if not line.isspace():
+          splitboi = line.split("//")[0]
+          self.gen_code_line_addr(splitboi)
+          self.gen_code(splitboi,output)
+    output.close()
+ 
+  @classmethod
+  def gen_code_line_addr(self,line):
     global code_addr
     global prognextadd
-
-    newline = re.split('(\(|\)|=|;|@)', line)
-    if newline[1] == '(':
-      if newline[2].isdigit():
+    lineboi = re.split('(\(|\)|=|;|@)', line)
+    
+    if lineboi[1] == '(':
+      if lineboi[2].isdigit():
         return
-    if newline[2] not in code_addr:
-      code_addr[newline[2]] = prognextadd
+    if lineboi[2] not in self.code_addr:
+      self.code_addr[lineboi[2]] = self.prognextadd
 
-    prognextadd += 1
-
-  def gen_code(line):
+    self.prognextadd += 1
+  
+ 
+    
+  @classmethod
+  def gen_code(self,line,output):
     global memnextadd
-    global code_addr
-    newline = re.split('(\(|\)|=|;|@)', line)
-    if newline[1] == '(':
+    global code_addr 
+    lineboi = re.split('(\(|\)|=|;|@)', line)
+    if lineboi[1] == '(':
       return
-    if newline[1] == '=':
-      if newline[2] in comp_a:
+    if lineboi[1] == '=':
+      if lineboi[2] in comp_a:
         a = '1'
-        print('111' + a + comp_a[newline[2]] + dest[newline[0]] + '000')
+        output.write('111' + a + comp_a[lineboi[2]] + dest[lineboi[0]] + '000')
       else :
         a = '0'
-        print('111' + a + comp_nota[newline[2]] + dest[newline[0]] + '000')
-        return
-    if newline[1] == ';':
-      print('111' + '0' + comp_a[newline[0]] + '000' + jump[newline[2]])
+        output.write('111' + a + comp_nota[lineboi[2]] + dest[lineboi[0]] + '000')
+      output.write('\n')
       return
-    if newline[1] == '@':
-      if newline[2].isdigit():
-        print('0' + format(int(newline[2]), '015b'))
+    if lineboi[1] == ';':
+        if lineboi[1] in comp_a:
+          output.write('111' + '0' + comp_a[lineboi[0]] + '000' + jump[lineboi[2]])
+        else:
+          output.write('111' + '0' + comp_nota[lineboi[0]] + '000' + jump[lineboi[2]])
+        output.write('\n')
         return
-      if newline[2] in code_addr:
-        print('0' + format(code_addr[newline[2]], '015b'))
+    if lineboi[1] == '@':
+      if lineboi[2].isdigit():
+        output.write('0' + format(int(lineboi[2]), '015b'))
+        output.write('\n')
         return
-      if newline[2] in def_add:
-        print('0' + format(def_add[newline[2]], '015b'))
+      if lineboi[2] in self.code_addr:
+        output.write('0' + format(self.code_addr[lineboi[2]], '015b'))
+        output.write('\n')
         return
-      if newline[2] in newvars:
-        print('0' + format(newvars[newline[2]], '015b'))
+      if lineboi[2] in def_add:
+        output.write('0' + format(def_add[lineboi[2]], '015b'))
+        output.write('\n')
         return
-      newvars[newline[2]] = memnextadd
-      print('0' + format(memnextadd, '015b'))
-      memnextadd += 1
+      if lineboi[2] in self.newvars:
+        output.write('0' + format(newvars[lineboi[2]], '015b'))
+        output.write('\n')
+        return
+      self.newvars[lineboi[2]] = self.memnextadd
+      output.write('0' + format(self.memnextadd, '015b'))
+      output.write('\n')
+      self.memnextadd += 1
       return 
     else :
       return
