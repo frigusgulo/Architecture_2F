@@ -111,21 +111,28 @@ class Assembler(object):
   code_addr = {}
   newvars = {}
   assemblycode = []
+  name = " "
 
-  def __init__(self, object):
+
+  def __init__(self, object,name):
+    self.outputname = str(name)
     for line in open(object, 'r'):
       if line.strip():
-      	if not line.startswith("//"):
+        if not line.startswith("//"):
           lineboi1 = line.replace(" ", "").replace("\n","")
           self.assemblycode.append(lineboi1)
     
   def assemble(self):
-    output = open("output.txt", "w") 
+    output = open(self.outputname, "w") 
     for line in self.assemblycode: 
       if not line.startswith("//"):
         if not line.isspace():
           splitboi = line.split("//")[0]
           self.gen_code_line_addr(splitboi)
+    for line in self.assemblycode: 
+      if not line.startswith("//"):
+        if not line.isspace():
+          splitboi = line.split("//")[0]
           self.gen_code(splitboi,output)
     output.close()
  
@@ -140,6 +147,8 @@ class Assembler(object):
         return
       elif lineboi[2] not in self.code_addr:
         self.code_addr[lineboi[2]] = self.prognextadd
+        return
+      return
 
     self.prognextadd += 1
   
@@ -150,50 +159,60 @@ class Assembler(object):
     global memnextadd
     global code_addr 
     lineboi = re.split('(\(|\)|=|;|@)', line)
-    print("lineboi: ",lineboi,"\n") #fixme
+  
     if lineboi[1] == '(':
       return
     elif lineboi[1] == '=':
       if lineboi[2] in comp_a:
         a = '1'
+       
         output.write('111' + a + comp_a[lineboi[2]] + dest[lineboi[0]] + '000')
       else :
         a = '0'
-        output.write('111' + a + comp_nota[lineboi[2]] + dest[lineboi[0]] + '000')
+       
+        output.write( '111' + a + comp_nota[lineboi[2]] + dest[lineboi[0]] + '000')
       output.write('\n')
       return
     elif lineboi[1] == ';':
         if lineboi[0] in comp_a:
-          output.write('111' + '0' + comp_a[lineboi[0]] + '000' + jump[lineboi[2]])
+         
+          output.write( '111' + '0' + comp_a[lineboi[0]] + '000' + jump[lineboi[2]])
         else:
-          output.write('111' + '0' + comp_nota[lineboi[0]] + '000' + jump[lineboi[2]])
+         
+          output.write( '111' + '0' + comp_nota[lineboi[0]] + '000' + jump[lineboi[2]])
         output.write('\n')
         return
     elif lineboi[1] == '@':
       if lineboi[2].isdigit():
+       
         output.write('0' + format(int(lineboi[2]), '015b'))
         output.write('\n')
         return
-      if lineboi[2] in self.code_addr:
+      elif lineboi[2] in self.code_addr:
+       
         output.write('0' + format(self.code_addr[lineboi[2]], '015b'))
         output.write('\n')
         return
-      if lineboi[2] in def_add:
+      elif lineboi[2] in def_add:
+       
         output.write('0' + format(int(def_add[lineboi[2]]), '015b'))
         output.write('\n')
         return
-      if lineboi[2] in self.newvars:
+      elif lineboi[2] in self.newvars:
+       
         output.write('0' + format(self.newvars[lineboi[2]], '015b'))
         output.write('\n')
         return
-      self.newvars[lineboi[2]] = self.memnextadd
-      output.write('0' + format(self.memnextadd, '015b'))
-      output.write('\n')
-      self.memnextadd += 1
-      return 
+      
+      else:
+        output.write( '0' + format(self.memnextadd, '015b'))
+        output.write('\n')
+        self.memnextadd += 1
+        self.newvars[lineboi[2]] = self.memnextadd
+        return 
     else :
       return
 
 if __name__ == "__main__":
-  assembler = Assembler(sys.argv[1])
+  assembler = Assembler(sys.argv[1],sys.argv[2])
   assembler.assemble()# run our code
